@@ -22,13 +22,14 @@ const { gql } = require('apollo-server')
  *
  */
 
+// Schema definition
 const typeDefs = gql`
   type User {
     id: ID!
     name: String!
     username: String!
     age: Int!
-    nationality: Nationality!
+    nationality: Nationality! # An enum (Nationality) can appear anywhere a scalar is valid (including as a field argument)
     friends: [User]
     favoriteMovies: [Movie]
   }
@@ -40,6 +41,16 @@ const typeDefs = gql`
     isInTheaters: Boolean!
   }
 
+  # The Query type
+  # The Query type is a special object type that defines all of the top-level entry points
+  # for queries that clients execute against your server.
+
+  # Each field of the Query type defines the name and return type of a different entry point.
+
+  # This Query type defines four fields: 'users', 'user', 'movies' and 'movie'. Each field
+  # returns a list of the corresponding type.
+
+  # https://www.apollographql.com/docs/apollo-server/schema/schema/
   type Query {
     users: [User!]!
     user(id: ID!): User!
@@ -47,6 +58,42 @@ const typeDefs = gql`
     movie(name: String!): Movie!
   }
 
+  # The Mutation type
+  # The Mutation type is similar in structure and purpose to the Query type.
+  # Whereas the Query type defines entry points for read operations,
+  # the Mutation type defines entry points for write operations.
+
+  # A mutation is used to change data on your server.
+  # https://www.apollographql.com/docs/kotlin/tutorial/09-write-your-first-mutation/
+  type Mutation {
+    createUser(input: CreateUserInput!): User
+    updateUsername(input: UpdateUsernameInput!): User
+    deleteUser(id: ID!): User
+  }
+
+  # Input types
+  # Input types are special object types that allow you to provide hierarchical data as arguments
+  # to fields (as opposed to providing only flat scalar arguments).
+
+  # https://www.apollographql.com/docs/apollo-server/schema/schema/#input-types
+  input CreateUserInput {
+    name: String!
+    username: String!
+    age: Int!
+    nationality: Nationality = INDIA # An enum (Nationality) can appear anywhere a scalar is valid (including as a field argument)
+  }
+
+  input UpdateUsernameInput {
+    id: ID!
+    newUsername: String!
+  }
+
+  # Enum types
+  # An enum is similar to a scalar type, but its legal values are defined in the schema.
+  # Enums are most useful in situations where the user must pick from a prescribed list of options.
+  # As an additional benefit, enum values autocomplete in tools like the Apollo Studio Explorer.
+
+  # https://www.apollographql.com/tutorials/side-quest-intermediate-schema-design/the-enum-type#:~:text=An%20enum%20is%20a%20GraphQL,schema%20through%20a%20locationType%20field.
   enum Nationality {
     CANADA
     BRAZIL
