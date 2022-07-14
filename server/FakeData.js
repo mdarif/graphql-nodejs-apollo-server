@@ -64,7 +64,7 @@ const UserList = [
 const MovieList = [
   {
     id: 1,
-    name: 'Avengers Endgame',
+    name: 'Avengers',
     yearOfPublication: 2019,
     isInTheaters: true
   },
