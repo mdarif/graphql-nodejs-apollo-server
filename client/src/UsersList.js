@@ -38,11 +38,20 @@ const CREATE_USER_MUTATION = gql`
   }
 `
 
+const DELETE_USER_MUTATION = gql`
+  mutation DeleteUser($deleteUserId: ID!) {
+    deleteUser(id: $deleteUserId) {
+      id
+    }
+  }
+`
+
 export default function UsersList () {
   const [movieSearch, setMovieSearch] = useState('')
 
   // Create User states
   const [name, setName] = useState('')
+  const [id, setId] = useState('')
   const [username, setUsername] = useState('')
   const [age, setAge] = useState('')
   const [nationality, setNationality] = useState('')
@@ -55,6 +64,7 @@ export default function UsersList () {
   ] = useLazyQuery(GET_MOVIE_BY_NAME)
 
   const [createUser] = useMutation(CREATE_USER_MUTATION)
+  const [deleteUser] = useMutation(DELETE_USER_MUTATION)
 
   if (error) console.log(error)
 
@@ -136,6 +146,28 @@ export default function UsersList () {
       </div>
 
       <div>
+        <input
+          type='text'
+          placeholder='Name...'
+          className='mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'
+          onChange={e => setId(e.target.value)}
+        />
+        <button
+          onClick={() => {
+            deleteUser({
+              variables: {
+                deleteUserId: id
+              }
+            })
+            refetch()
+          }}
+          className='inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+        >
+          Delete User
+        </button>
+      </div>
+
+      <div>
         {data &&
           data.users.map(user => {
             return (
@@ -143,6 +175,9 @@ export default function UsersList () {
                 <ul role='list' className='p-6 divide-y divide-slate-200'>
                   <li className='flex py-4 first:pt-0 last:pb-0'>
                     <div className='ml-3 overflow-hidden'>
+                      <p className='text-sm text-slate-500 truncate'>
+                        Id: {user.id}
+                      </p>
                       <p className='text-sm font-medium text-slate-900'>
                         Name: {user.name}
                       </p>
