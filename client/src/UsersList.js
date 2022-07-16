@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useQuery, gql, useLazyQuery } from '@apollo/client'
+import { useQuery, gql, useLazyQuery, useMutation } from '@apollo/client'
 
 const QUERY_ALL_USERS = gql`
   query GetAllUsers {
@@ -29,16 +29,32 @@ const GET_MOVIE_BY_NAME = gql`
     }
   }
 `
+const CREATE_USER_MUTATION = gql`
+  mutation CreateUser($input: CreateUserInput!) {
+    createUser(input: $input) {
+      name
+      id
+    }
+  }
+`
 
 export default function UsersList () {
   const [movieSearch, setMovieSearch] = useState('')
 
-  const { data, loading, error } = useQuery(QUERY_ALL_USERS)
+  // Create User states
+  const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
+  const [age, setAge] = useState('')
+  const [nationality, setNationality] = useState('')
+
+  const { data, loading, error, refetch } = useQuery(QUERY_ALL_USERS)
   const { data: movieData } = useQuery(QUERY_ALL_MOVIES)
   const [
     fetchMovie,
     { data: movieSearchData, error: movieError }
   ] = useLazyQuery(GET_MOVIE_BY_NAME)
+
+  const [createUser] = useMutation(CREATE_USER_MUTATION)
 
   if (error) console.log(error)
 
@@ -80,6 +96,46 @@ export default function UsersList () {
       </div>
 
       <div>
+        <input
+          type='text'
+          placeholder='Name...'
+          className='mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'
+          onChange={e => setName(e.target.value)}
+        />
+        <input
+          type='text'
+          placeholder='Username...'
+          className='mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'
+          onChange={e => setUsername(e.target.value)}
+        />
+        <input
+          type='number'
+          placeholder='Age...'
+          className='mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'
+          onChange={e => setAge(e.target.value)}
+        />
+        <input
+          type='text'
+          placeholder='Nationality...'
+          className='mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'
+          onChange={e => setNationality(e.target.value.toUpperCase())}
+        />
+        <button
+          onClick={() => {
+            createUser({
+              variables: {
+                input: { name, username, age: Number(age), nationality }
+              }
+            })
+            refetch()
+          }}
+          className='inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+        >
+          Create User
+        </button>
+      </div>
+
+      <div>
         {data &&
           data.users.map(user => {
             return (
@@ -95,6 +151,9 @@ export default function UsersList () {
                       </p>
                       <p className='text-sm text-slate-500 truncate'>
                         Nationality: {user.nationality}
+                      </p>
+                      <p className='text-sm text-slate-500 truncate'>
+                        Age: {user.age}
                       </p>
                     </div>
                   </li>
